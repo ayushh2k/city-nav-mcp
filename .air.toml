@@ -1,0 +1,11 @@
+root = "."
+tmp_dir = "bin"
+
+[build]
+cmd = "go build -o ./bin/mcp-server-dev ./cmd/mcp-server/main.go"
+bin = "bin/mcp-server-dev"
+watch_ext = ["go", "toml"]
+include_dir = ["cmd", "internal"]
+
+[log]
+time = true
