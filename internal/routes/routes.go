@@ -2,15 +2,18 @@ package routes
 
 import (
 	"mcp-server/internal/handlers"
+	"mcp-server/internal/middleware"
 	"mcp-server/internal/services"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 func SetupRouter() *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 	router.SetTrustedProxies(nil)
 
 	router.GET("/", func(c *gin.Context) {
@@ -21,21 +24,31 @@ func SetupRouter() *gin.Engine {
 		Timeout: 10 * time.Second,
 	}
 
-	geoService := services.NewGeoService(httpClient)
-	geoHandler := handlers.NewGeoHandler(geoService)
+	limitRate := rate.Every(time.Minute / 30)
+	limitBurst := 30
 
-	geoGroup := router.Group("/mcp-geo")
+	mcpGroup := router.Group("/mcp")
+	mcpGroup.Use(middleware.JsonLoggingMiddleware())
+	mcpGroup.Use(middleware.AuthMiddleware())
 	{
-		geoGroup.GET("/geocode", geoHandler.Geocode)
-		geoGroup.GET("/nearby", geoHandler.Nearby)
-	}
+		geoService := services.NewGeoService(httpClient)
+		geoHandler := handlers.NewGeoHandler(geoService)
 
-	weatherService := services.NewWeatherService(httpClient)
-	weatherHandler := handlers.NewWeatherHandler(weatherService)
+		geoGroup := mcpGroup.Group("/geo")
+		geoGroup.Use(middleware.PerIPRateLimiter(limitRate, limitBurst))
+		{
+			geoGroup.GET("/geocode", geoHandler.Geocode)
+			geoGroup.GET("/nearby", geoHandler.Nearby)
+		}
 
-	weatherGroup := router.Group("/mcp-weather")
-	{
-		weatherGroup.GET("/forecast", weatherHandler.Forecast)
+		weatherService := services.NewWeatherService(httpClient)
+		weatherHandler := handlers.NewWeatherHandler(weatherService)
+
+		weatherGroup := mcpGroup.Group("/weather")
+		weatherGroup.Use(middleware.PerIPRateLimiter(limitRate, limitBurst))
+		{
+			weatherGroup.GET("/forecast", weatherHandler.Forecast)
+		}
 	}
 
 	return router
