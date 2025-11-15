@@ -26,6 +26,6 @@ type NearbyRequestParams struct {
 	Lat     float64 `form:"lat" binding:"required"`
 	Lon     float64 `form:"lon" binding:"required"`
 	Query   string  `form:"query" binding:"required"`
-	RadiusM int     `form:"radius_m" binding:"required,le=5000"`
-	Limit   int     `form:"limit" binding:"required,le=15"`
+	RadiusM int     `form:"radius_m" binding:"required,lte=5000"`
+	Limit   int     `form:"limit" binding:"required,lte=15"`
 }
