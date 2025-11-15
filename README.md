@@ -92,3 +92,18 @@ All endpoints are protected by an X-API-KEY header and a 30 req/min rate limit.
    make dev
    ```
    The server will run on `http://localhost:8000`.
+
+---
+
+## 🐳 Running with Docker
+
+
+### Prerequisites
+
+* Docker & Docker Compose installed.
+* Ensure your `.env` files are created in both the `mcp-server` and `orchestrator` directories with all the required API keys.
+
+Run:
+
+```bash
+docker-compose up --build

@@ -42,7 +42,7 @@ type measurementResponse struct {
 }
 
 func (s *AirService) GetAQI(params dtos.AirQualityRequestParams) (*dtos.AirQualityResponse, error) {
-	log.Printf("--- NEW REQUEST (2-STEP) --- Service: Calling OpenAQ v3 API: lat=%f, lon=%f", params.Lat, params.Lon)
+	log.Printf("Service: Calling OpenAQ v3 API: lat=%f, lon=%f", params.Lat, params.Lon)
 
 	sensorMap, err := s.findClosestSensors(params.Lat, params.Lon)
 	if err != nil {
